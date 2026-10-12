@@ -41,6 +41,7 @@ SourceFiles
 #define forceBalanceContactAngleFvPatchScalarField_H
 
 #include "alphaContactAngleFvPatchScalarField.H"
+#include <vector>
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -68,6 +69,13 @@ class forceBalanceContactAngleFvPatchScalarField
 
 		//- Scale factor for adhesion force in 2D
         scalar kk;
+
+        //- Contact angle applied at the previous time step (one value per
+        //  face of this patch); updated inside the const member theta()
+        mutable scalarField thetaDynOld_;
+
+        //- Per-droplet flag: true once the droplet has started sliding
+        mutable std::vector<bool> dropAlreadySliding_;
 
 
 public:

@@ -2,7 +2,11 @@ Foam::tmp<Foam::scalarField> theta_dyn(new Foam::scalarField(patch().size()));		
 scalarField& theta_dyn_ref = theta_dyn.ref();										// Scalar field to access to variable stored in theta_dyn in the for cycle
 theta_dyn_ref = theta0_;															// Initialize field value to equilibrium contact angle
 
-static std::vector<bool> dropAlreadySlidingCheck(dropNumber, false);				// Flag to determine if the droplet is already sliding in the simulation
+std::vector<bool>& dropAlreadySlidingCheck = dropAlreadySliding_;				// Flag to determine if the droplet is already sliding in the simulation (member data: one per patch)
+if (static_cast<int>(dropAlreadySlidingCheck.size()) < dropNumber)			// Grow the list if new droplets appear (break-up, new droplets entering the domain)
+{
+	dropAlreadySlidingCheck.resize(dropNumber, false);
+}
 
 for (int dropIdx = 0; dropIdx < dropNumber; dropIdx++)		// For every droplet in the domain
 {

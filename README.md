@@ -139,7 +139,9 @@ Run the solver **from the case directory**: the boundary condition and the solve
 - **Rigid sliding**: the contact line velocity is approximated by the droplet centre-of-mass velocity; a droplet either slides as a whole or stays pinned.
 - **2D cases**: the adhesion correlation is three-dimensional; in 2D the shape factor `kk` accounts for the unresolved transverse direction and must be chosen by the user.
 - **Droplet IDs**: when droplets merge, the number of droplets decreases and the indices in the output files shift, so an index does not always identify the same droplet over time.
-- Hard-coded numerical parameters (in the source): liquid threshold `alpha > 0.02` (boundary condition) and `alpha > 0.01` (solver); reconstruction tolerance `0.01` on the cell volume fraction; forces sampled 3 cells away from the interface.
+- **Single wall patch**: apply the boundary condition to one patch only. Each patch keeps its own state, but the exchange files read by the solver are shared; a warning is printed if more than one patch uses `forceBalanceContactAngle` (merge the walls, e.g. with `createPatch`).
+- Hard-coded numerical parameters (in the source): liquid threshold `alpha > 0.02` (boundary condition) and `alpha > 0.01` (solver); reconstruction tolerance `0.01` on the cell volume fraction; flow quantities sampled in the air, 3 cells away from the interface along its normal.
+- **Drag evaluation**: the pressure contribution uses the dynamic pressure `0.5*rho_air*|U|^2` of the sampled air cell (not the static pressure field); the viscous contribution uses `mu_air*(grad(U) + grad(U)^T)` of the same cell.
 
 ## Output
 

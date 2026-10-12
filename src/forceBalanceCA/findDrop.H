@@ -3,6 +3,29 @@
 const volScalarField& alpha1 = mesh.lookupObject<volScalarField>("alpha.water");	// Read alpha of the primary phase (water) in the mesh at each timestep
 const scalar treshold_alpha = 0.02;													// Volume fraction threshold to define water cells
 
+// Warn (once) if this boundary condition is applied to more than one patch: per-patch state is kept
+// separately, but the droplet exchange files (dropNumber.txt, Adhesion_Check_<i>.txt, ...) are shared
+static bool multiPatchChecked = false;
+if (!multiPatchChecked && mesh.time().timeIndex() > mesh.time().startTimeIndex())
+{
+	label nPatchesWithBC = 0;
+	forAll(alpha1.boundaryField(), patchI)
+	{
+		if (alpha1.boundaryField()[patchI].type() == typeName)
+		{
+			nPatchesWithBC++;
+		}
+	}
+	if (nPatchesWithBC > 1)
+	{
+		WarningInFunction
+			<< typeName << " is applied to " << nPatchesWithBC << " patches." << nl
+			<< "    Forces and contact angles are evaluated per patch, but the exchange files read by the" << nl
+			<< "    solver are shared: merge the walls into a single patch (e.g. with createPatch)." << endl;
+	}
+	multiPatchChecked = true;
+}
+
 const fvPatch& patch_ = this->patch();					// Reference to the patch where the dynamic angle boundary is applied
 const labelUList& faceCells = patch_.faceCells();		// Reference to the faces of the patch
 

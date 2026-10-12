@@ -50,7 +50,9 @@ forceBalanceContactAngleFvPatchScalarField
     theta0_(0.0),
     thetaA_(0.0),
     thetaR_(0.0),
-    kk(0.0)
+    kk(0.0),
+    thetaDynOld_(p.size(), 0.0),
+    dropAlreadySliding_()
 {}
 
 
@@ -67,7 +69,9 @@ forceBalanceContactAngleFvPatchScalarField
     theta0_(gcpsf.theta0_),
     thetaA_(gcpsf.thetaA_),
     thetaR_(gcpsf.thetaR_),
-    kk(gcpsf.kk)
+    kk(gcpsf.kk),
+    thetaDynOld_(p.size(), gcpsf.theta0_),
+    dropAlreadySliding_(gcpsf.dropAlreadySliding_)
 {}
 
 
@@ -83,7 +87,9 @@ forceBalanceContactAngleFvPatchScalarField
     theta0_(readScalar(dict.lookup("theta0"))),
     thetaA_(readScalar(dict.lookup("thetaA"))),
     thetaR_(readScalar(dict.lookup("thetaR"))),
-    kk(readScalar(dict.lookup("kk")))
+    kk(readScalar(dict.lookup("kk"))),
+    thetaDynOld_(p.size(), theta0_),
+    dropAlreadySliding_()
 {
     evaluate();
 }
@@ -99,7 +105,9 @@ forceBalanceContactAngleFvPatchScalarField
     theta0_(gcpsf.theta0_),
     thetaA_(gcpsf.thetaA_),
     thetaR_(gcpsf.thetaR_),
-    kk(gcpsf.kk)
+    kk(gcpsf.kk),
+    thetaDynOld_(gcpsf.thetaDynOld_),
+    dropAlreadySliding_(gcpsf.dropAlreadySliding_)
 {}
 
 
@@ -114,7 +122,9 @@ forceBalanceContactAngleFvPatchScalarField
     theta0_(gcpsf.theta0_),
     thetaA_(gcpsf.thetaA_),
     thetaR_(gcpsf.thetaR_),
-    kk(gcpsf.kk)
+    kk(gcpsf.kk),
+    thetaDynOld_(gcpsf.thetaDynOld_),
+    dropAlreadySliding_(gcpsf.dropAlreadySliding_)
 {}
 
 

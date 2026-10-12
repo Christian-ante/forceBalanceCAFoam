@@ -1,4 +1,8 @@
-static scalarField theta_dyn_OLD(patch().size(), theta0_);			// Theta scalar field of the previous timestep
+scalarField& theta_dyn_OLD = thetaDynOld_;							// Theta scalar field of the previous timestep (member data: one per patch)
+if (theta_dyn_OLD.size() != patch().size())
+{
+	theta_dyn_OLD.setSize(patch().size(), theta0_);
+}
 
 scalarField factor(patch().size(), 0.0);							// Scale factor of evaluated contact angle (to consider lateral surface of the advancing droplet) (LINEAR TREND AT THE MOMENT)
 scalarField& factor_ref = factor;									// Reference scalar field to access factor scalar field

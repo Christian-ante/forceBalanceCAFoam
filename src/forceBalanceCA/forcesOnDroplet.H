@@ -185,13 +185,13 @@ for (int dropIdx = 0; dropIdx < dropNumber; dropIdx++)			// For every droplet in
 
 			p_dyn_point_cell = mesh.C()[closestCell_p];					// Position of the closest cell to reference cell
 			p_dyn_point_cell_vel = U[closestCell_p];					// Velocity of the closest cell to reference cell
-			viscousStress = mu_air * gradU[closestCell_p];				// Local viscous stress (air side of the interface)
+			viscousStress = tensor(mu_air * twoSymm(gradU[closestCell_p]));	// Local viscous stress mu_air*(gradU + gradU^T) (air side of the interface)
 
 			p_dyn = 0.5 * rho_air * magSqr(p_dyn_point_cell_vel);				// Dynamic pressure = 1/2 * rho_air * U^2
 			localPressureForce = n_Inter[celli] * p_dyn * dA;					// Local pressure drag force
 			pressureForce[dropIdx] += localPressureForce;								// Total pressure force
 
-			localViscousForce = viscousStress & (n_Inter[celli] * dA);			// Local viscous drag force
+			localViscousForce = viscousStress & (-n_Inter[celli] * dA);		// Local viscous drag force (n_Inter points into the droplet -> use the outward normal)
 			viscousForce[dropIdx] += localViscousForce;									// Total viscous force
 
 			dA_TOT[dropIdx] += dA;
