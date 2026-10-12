@@ -106,22 +106,21 @@ phases (water air);
 water
 {
     transportModel  Newtonian;
-    nu              ...;
-    rho             ...;
-    mu              ...;     // REQUIRED by the boundary condition (dynamic viscosity of water)
+    nu              1e-06;
+    rho             1000;
 }
 
 air
 {
     transportModel  Newtonian;
-    nu              ...;
-    rho             ...;
+    nu              1.48e-05;
+    rho             1;
 }
 
-sigma           ...;
+sigma           0.07;
 ```
 
-It reads `rho` of both phases, `mu` of water and `sigma` as plain scalars; note that `mu` is **not** part of the standard interFoam `transportProperties` and must be added to the `water` sub-dictionary, otherwise the run stops with an error. The gravity vector is read from `constant/g`.
+It reads `rho` and `nu` of both phases and `sigma`, written as plain scalars as in the standard OpenFOAM-7 interFoam tutorials (no extra entries are needed). The dynamic viscosities are computed as `mu = rho*nu`: the air viscosity is used for the viscous drag, the water viscosity for the capillary number. The gravity vector is read from `constant/g`.
 
 ### 4. Run
 
