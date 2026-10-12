@@ -1,0 +1,164 @@
+/*---------------------------------------------------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     |
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+License
+    This file is part of OpenFOAM.
+
+    OpenFOAM is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
+    ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+    FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+    for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
+
+Class
+    Foam::forceBalanceContactAngleFvPatchScalarField
+
+Description
+    Dynamic contact angle boundary condition driven by a droplet-level force
+    balance (forceBalanceCAFoam). Derived from the OpenFOAM-7
+    dynamicAlphaContactAngle boundary condition. Droplets are identified with
+    a parallel flood-fill algorithm, drag and adhesion forces are integrated
+    per droplet, and the contact angle is set within or beyond the contact
+    angle hysteresis window depending on the drag-to-adhesion ratio.
+
+SourceFiles
+    forceBalanceContactAngleFvPatchScalarField.C
+
+\*---------------------------------------------------------------------------*/
+
+#ifndef forceBalanceContactAngleFvPatchScalarField_H
+#define forceBalanceContactAngleFvPatchScalarField_H
+
+#include "alphaContactAngleFvPatchScalarField.H"
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+namespace Foam
+{
+
+/*---------------------------------------------------------------------------*\
+                       Class forceBalanceContactAngleFvPatchScalarField Declaration
+\*---------------------------------------------------------------------------*/
+
+class forceBalanceContactAngleFvPatchScalarField
+:
+    public alphaContactAngleFvPatchScalarField
+{
+    // Private data
+
+        //- Equilibrium contact angle
+        scalar theta0_;
+
+        //- Limiting advancing contact angle
+        scalar thetaA_;
+
+        //- Limiting receeding contact angle
+        scalar thetaR_;
+
+		//- Scale factor for adhesion force in 2D
+        scalar kk;
+
+
+public:
+
+    //- Runtime type information
+    TypeName("forceBalanceContactAngle");
+
+
+    // Constructors
+
+        //- Construct from patch and internal field
+        forceBalanceContactAngleFvPatchScalarField
+        (
+            const fvPatch&,
+            const DimensionedField<scalar, volMesh>&
+        );
+
+        //- Construct from patch, internal field and dictionary
+        forceBalanceContactAngleFvPatchScalarField
+        (
+            const fvPatch&,
+            const DimensionedField<scalar, volMesh>&,
+            const dictionary&
+        );
+
+        //- Construct by mapping given
+        //  forceBalanceContactAngleFvPatchScalarField
+        //  onto a new patch
+        forceBalanceContactAngleFvPatchScalarField
+        (
+            const forceBalanceContactAngleFvPatchScalarField&,
+            const fvPatch&,
+            const DimensionedField<scalar, volMesh>&,
+            const fvPatchFieldMapper&
+        );
+
+        //- Construct as copy
+        forceBalanceContactAngleFvPatchScalarField
+        (
+            const forceBalanceContactAngleFvPatchScalarField&
+        );
+
+        //- Construct and return a clone
+        virtual tmp<fvPatchScalarField> clone() const
+        {
+            return tmp<fvPatchScalarField>
+            (
+                new forceBalanceContactAngleFvPatchScalarField(*this)
+            );
+        }
+
+        //- Construct as copy setting internal field reference
+        forceBalanceContactAngleFvPatchScalarField
+        (
+            const forceBalanceContactAngleFvPatchScalarField&,
+            const DimensionedField<scalar, volMesh>&
+        );
+
+        //- Construct and return a clone setting internal field reference
+        virtual tmp<fvPatchScalarField> clone
+        (
+            const DimensionedField<scalar, volMesh>& iF
+        ) const
+        {
+            return tmp<fvPatchScalarField>
+            (
+                new forceBalanceContactAngleFvPatchScalarField(*this, iF)
+            );
+        }
+
+
+    // Member functions
+
+        //- Evaluate and return dynamic contact-angle
+        virtual tmp<scalarField> theta
+        (
+            const fvPatchVectorField& Up,
+            const fvsPatchVectorField& nHat
+        ) const;
+
+        //- Write
+        virtual void write(Ostream&) const;
+};
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+} // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#endif
+
+// ************************************************************************* //
