@@ -26,7 +26,7 @@ Application
 
 Description
     interFoam (OpenFOAM-7) extended with the droplet pinning/deceleration
-    logic of forceBalanceCAFoam (see adh_check.H), to be used together with
+    logic of forceBalanceCAFoam (dropletSet::correctVelocity), to be used together with
     the forceBalanceContactAngle boundary condition (libforceBalanceCA).
 
     Original interFoam description:
@@ -50,6 +50,7 @@ Description
 #include "fvOptions.H"
 #include "CorrectPhi.H"
 #include "fvcSmooth.H"
+#include "dropletSet.H"
 
 
 
@@ -170,8 +171,13 @@ int main(int argc, char *argv[])
             << nl << endl;
 
 
-		// ADDED HEADER FILE TO CHECK IF THE CUSTOM BOUNDARY CONDITION EVALUATE AN ADHESION CONDITION FOR THE DROPLET
-		#include "adh_check.H"
+		// forceBalanceCAFoam: pin (if at rest) or decelerate (if moving) the droplets
+		// in adhesion; the state is set by the forceBalanceContactAngle condition
+		if (mesh.foundObject<dropletSet>(dropletSet::typeName))
+		{
+			mesh.lookupObject<dropletSet>(dropletSet::typeName)
+				.correctVelocity(U, alpha1);
+		}
 
 
     }

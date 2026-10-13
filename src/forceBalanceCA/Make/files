@@ -1,3 +1,4 @@
+dropletSet/dropletSet.C
 forceBalanceContactAngleFvPatchScalarField.C
 
 LIB = $(FOAM_USER_LIBBIN)/libforceBalanceCA

@@ -19,22 +19,23 @@ The code was developed for water removal in the gas channels of PEM fuel cells, 
 
 ```
 forceBalanceCAFoam/
-├── src/forceBalanceCA/                     Boundary condition library (libforceBalanceCA)
+├── src/forceBalanceCA/                       Library libforceBalanceCA
+│   ├── dropletSet/dropletSet.{C,H}           Droplet data shared by boundary condition and solver:
+│   │                                         parallel flood-fill (vofID), mass, centre of mass,
+│   │                                         velocity, interface reconstruction and drag
 │   ├── forceBalanceContactAngleFvPatchScalarField.{C,H}
-│   ├── readProperties.H                    Reads transportProperties and g
-│   ├── findDrop.H                          Parallel flood-fill droplet identification (vofID field)
-│   ├── dropG.H, dropVel.H                  Centre of mass, mass and mean velocity of each droplet
-│   ├── forcesOnDroplet.H                   Interface reconstruction, drag and adhesion forces
-│   ├── lateralScaleFactor.H                Blending between advancing and receding fronts
-│   ├── contactAngleHysteresis.H            Contact angle inside the CAH window (pinned droplets)
-│   ├── contactAngleCorrelations.H          Dynamic contact angle correlations (sliding droplets)
-│   ├── printGpositionVelocity.H, printForces.H   Per-droplet output files
-│   └── utilities/                          Plane search, plane–cell intersection, polygon area
-├── applications/solvers/forceBalanceCAFoam/   interFoam (OpenFOAM-7) + adh_check.H
+│   │                                         Boundary condition: adhesion on the wall, drag-to-adhesion
+│   │                                         ratio, hysteresis window and dynamic contact angle correlations
+│   └── utilities/                            Plane search, plane–cell intersection, polygon area
+├── applications/solvers/forceBalanceCAFoam/  interFoam (OpenFOAM-7) + droplet pinning/deceleration
 ├── Allwmake, Allwclean
-├── LICENSE / Licence.txt                   GNU GPL v3
+├── LICENSE / Licence.txt                     GNU GPL v3
 └── README.md
 ```
+
+### How the parts interact
+
+At each evaluation of the contact angle, the boundary condition updates the `dropletSet`, an object stored in the mesh database (`objectRegistry`) and therefore shared with the solver. The `dropletSet` identifies the droplets and computes their kinematics and drag; the boundary condition adds the adhesion force on its wall, computes the drag-to-adhesion ratio, sets the contact angle and stores the adhesion state of each droplet. At the end of the time step the solver reads this state from the `dropletSet` and pins or decelerates the droplets in adhesion. No files are used to exchange data.
 
 ## Requirements
 
@@ -76,6 +77,8 @@ Other OpenFOAM versions or the ESI distribution (openfoam.com) have not been tes
 ```
 libs ("libforceBalanceCA.so");
 ```
+
+The solver is already linked to the library; the `libs` entry is needed so that the other OpenFOAM utilities (e.g. `decomposePar`, `foamToVTK`) recognise the boundary condition.
 
 ### 2. Boundary condition — `0/alpha.water`
 
@@ -122,7 +125,23 @@ sigma           0.07;
 
 It reads `rho` and `nu` of both phases and `sigma`, written as plain scalars as in the standard OpenFOAM-7 interFoam tutorials (no extra entries are needed). The dynamic viscosities are computed as `mu = rho*nu`: the air viscosity is used for the viscous drag, the water viscosity for the capillary number. The gravity vector is read from `constant/g`.
 
-### 4. Run
+### 4. Numerical parameters (optional) — `constant/dropletProperties`
+
+If the file or an entry is missing, the default value below is used, so existing cases run unchanged:
+
+```
+alphaMin            0.01;   // volume fraction above which a cell belongs to a droplet
+alphaMaxInterface   0.99;   // volume fraction below which a liquid cell is an interface cell
+sampleDistance      3;      // distance (cells) of the drag sampling point from the interface
+planeTolerance      0.01;   // tolerance on the cell volume fraction in the plane search
+planeMaxIter        100;    // maximum bisection iterations of the plane search
+planePoints         10;     // sampling points per cell edge in the plane search
+planeDRange         10;     // half-width of the initial interval of the plane intercept
+```
+
+The values used are printed in the log at start-up.
+
+### 5. Run
 
 ```bash
 forceBalanceCAFoam                              # serial
@@ -130,7 +149,7 @@ decomposePar
 mpirun -np <N> forceBalanceCAFoam -parallel     # parallel
 ```
 
-Run the solver **from the case directory**: the boundary condition and the solver exchange information through text files written in the working directory (see below).
+Run the solver from the case directory: the per-droplet output files are written in the working directory (see below).
 
 ## Assumptions and limitations
 
@@ -139,8 +158,9 @@ Run the solver **from the case directory**: the boundary condition and the solve
 - **Rigid sliding**: the contact line velocity is approximated by the droplet centre-of-mass velocity; a droplet either slides as a whole or stays pinned.
 - **2D cases**: the adhesion correlation is three-dimensional; in 2D the shape factor `kk` accounts for the unresolved transverse direction and must be chosen by the user.
 - **Droplet IDs**: when droplets merge, the number of droplets decreases and the indices in the output files shift, so an index does not always identify the same droplet over time.
-- **Single wall patch**: apply the boundary condition to one patch only. Each patch keeps its own state, but the exchange files read by the solver are shared; a warning is printed if more than one patch uses `forceBalanceContactAngle` (merge the walls, e.g. with `createPatch`).
-- Hard-coded numerical parameters (in the source): liquid threshold `alpha > 0.01` (boundary condition and solver); reconstruction tolerance `0.01` on the cell volume fraction; flow quantities sampled in the air, 3 cells away from the interface along its normal.
+- **Single wall patch**: apply the boundary condition to one patch only. Adhesion force and state are stored once per droplet, so with several patches the last one evaluated prevails; a warning is printed if more than one patch uses `forceBalanceContactAngle` (merge the walls, e.g. with `createPatch`).
+- **Static mesh**: mesh refinement or topology changes are not supported (the run stops with an error).
+- **Numerical parameters**: see `constant/dropletProperties` above; drag and pressure are sampled in the air, `sampleDistance` cells away from the interface along its normal.
 - **Drag evaluation**: the pressure contribution uses the dynamic pressure `0.5*rho_air*|U|^2` of the sampled air cell (not the static pressure field); the viscous contribution uses `mu_air*(grad(U) + grad(U)^T)` of the same cell.
 
 ## Output
@@ -152,11 +172,9 @@ In addition to the standard fields, the following are written:
 | `vofID` (field, time directories) | Droplet label of each cell (0 = no liquid) |
 | `CenterOfMass_<i>.txt` | Time, centre-of-mass position and mean velocity of droplet *i* |
 | `ForcesOnDroplet_<i>.txt` | Time, pressure and viscous force, gravity (x), total drag (x), adhesion force, drag-to-adhesion ratio |
-| `dropNumber.txt`, `droplet_<i>_label.txt` | Number of droplets and their labels (read by the solver) |
-| `Adhesion_Check_<i>.txt`, `dropDeceleration_<i>.txt` | Present only while droplet *i* is in adhesion; deceleration applied by the solver |
 | `WARNING_2D/3D_wrongIntersectionNumber_*.txt` | Diagnostic files written if the plane–cell intersection is inconsistent |
 
-The `.txt` files are written in the directory from which the solver is launched.
+The `.txt` files are written in the directory from which the solver is launched, at time 0 and at the output times.
 
 ## Tutorial
 

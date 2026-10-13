@@ -48,6 +48,8 @@ SourceFiles
 namespace Foam
 {
 
+class dropletSet;
+
 /*---------------------------------------------------------------------------*\
                        Class forceBalanceContactAngleFvPatchScalarField Declaration
 \*---------------------------------------------------------------------------*/
@@ -76,6 +78,48 @@ class forceBalanceContactAngleFvPatchScalarField
 
         //- Per-droplet flag: true once the droplet has started sliding
         mutable std::vector<bool> dropAlreadySliding_;
+
+
+    // Private Member Functions
+
+        //- Adhesion force (wetted area on this patch) and drag-to-adhesion
+        //  ratio of each droplet, stored in the dropletSet
+        void computeAdhesion(dropletSet& droplets) const;
+
+        //- Scale factor (blending between front and rear) and contact line
+        //  velocity of each face wetted by a droplet
+        void lateralScaleFactor
+        (
+            const dropletSet& droplets,
+            const labelList& faceDroplet,
+            scalarField& factor,
+            scalarField& uwall
+        ) const;
+
+        //- Contact angle of the droplets in adhesion (S <= 1): linear
+        //  interpolation inside the hysteresis window
+        void contactAngleHysteresis
+        (
+            dropletSet& droplets,
+            const labelList& faceDroplet,
+            const scalarField& factor,
+            const scalarField& uwall,
+            scalarField& thetaDyn
+        ) const;
+
+        //- Contact angle of the sliding droplets (S > 1): Kistler
+        //  (advancing) and Nichita et al. (receding) correlations
+        void contactAngleCorrelations
+        (
+            const dropletSet& droplets,
+            const labelList& faceDroplet,
+            const scalarField& factor,
+            const scalarField& uwall,
+            scalarField& thetaDyn
+        ) const;
+
+        //- Warn once if the condition is applied to more than one patch
+        void checkSinglePatch() const;
 
 
 public:
