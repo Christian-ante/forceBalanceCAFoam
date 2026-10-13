@@ -1,7 +1,7 @@
 // Flood-fill algorithm
 
 const volScalarField& alpha1 = mesh.lookupObject<volScalarField>("alpha.water");	// Read alpha of the primary phase (water) in the mesh at each timestep
-const scalar treshold_alpha = 0.02;													// Volume fraction threshold to define water cells
+const scalar treshold_alpha = 0.01;													// Volume fraction threshold to define water cells
 
 // Warn (once) if this boundary condition is applied to more than one patch: per-patch state is kept
 // separately, but the droplet exchange files (dropNumber.txt, Adhesion_Check_<i>.txt, ...) are shared

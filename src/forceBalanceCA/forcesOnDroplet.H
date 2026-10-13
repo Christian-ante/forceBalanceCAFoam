@@ -5,6 +5,7 @@ const volVectorField gradAlpha1 = fvc::grad(alpha1);							// Vector field of gr
 dimensionedScalar smallDim("smallDim", gradAlpha1.dimensions(), SMALL);			// Avoid division by 0!!
 const volVectorField n_Inter = gradAlpha1 / (mag(gradAlpha1) + smallDim);		// Normal versor to the interface
 const volTensorField gradU = fvc::grad(U);										// Tensor field of gradient of velocity in the domain
+(void)mesh.tetBasePtIs();											// Build the cell decomposition used by findCell on all processors (collective in parallel)
 
 using Point = std::vector<double>;						// Declaration for a point
 using Edge = std::pair<Point, Point>;					// Declaration for a couple of points
@@ -162,25 +163,18 @@ for (int dropIdx = 0; dropIdx < dropNumber; dropIdx++)			// For every droplet in
 			vector p_dyn_point = mesh.C()[celli] - k * n_Inter[celli] * l;		// Position to evaluate dynamic pressure and viscous forces contributes
 
 			int closestCell_p = -1;				// ID of the closest cell to reference cell
-			double MinDistance_p = GREAT;		// Variable to store the minimum distance between cell centroid and reference cell
-			double distance = 0;				// Variable to store distance between each cell and reference one
 			double p_dyn = 0;					// Dynamic pressure
 			vector p_dyn_point_cell;			// Position of the closest cell to reference cell
 			vector p_dyn_point_cell_vel;		// Velocity of the closest cell to reference cell
-			vector cellC;						// Centroid of the cell in the cycle
 			vector localPressureForce;			// Local pressure drag force
 			vector localViscousForce;			// Local viscous drag force
 			tensor viscousStress;				// Local viscous stress
 
-			forAll(mesh.cells(), celli_p) 		// Cycle through all the cell in the domain, looking to the closest one to "p_dyn_point"
+			// Cell containing the sampling point: octree search (fast) instead of a loop over all cells
+			closestCell_p = mesh.findCell(p_dyn_point);
+			if (closestCell_p < 0)				// Point outside this processor's sub-domain (or outside the mesh)
 			{
-				cellC = mesh.C()[celli_p];					// Center of celli_p cell
-				distance = mag(p_dyn_point - cellC);		// Distance form selected point and celli_p center
-				if (distance < MinDistance_p)				// Check if the new distance is lower than the previously saved one
-				{
-					MinDistance_p = distance;				// Update the minimum distance from the reference cell
-					closestCell_p = celli_p;				// ID of the closest cell to reference cell
-				}
+				closestCell_p = mesh.findNearestCell(p_dyn_point);	// Fall back to the nearest local cell centre (previous behaviour)
 			}
 
 			p_dyn_point_cell = mesh.C()[closestCell_p];					// Position of the closest cell to reference cell
