@@ -28,6 +28,7 @@ forceBalanceCAFoam/
 │   │                                         ratio, hysteresis window and dynamic contact angle correlations
 │   └── utilities/                            Plane search, plane–cell intersection, polygon area
 ├── applications/solvers/forceBalanceCAFoam/  interFoam (OpenFOAM-7) + droplet pinning/deceleration
+├── tutorials/twoDroplets/                    Example case: two droplets in a channel
 ├── Allwmake, Allwclean
 ├── LICENSE / Licence.txt                     GNU GPL v3
 └── README.md
@@ -178,7 +179,27 @@ The `.txt` files are written in the directory from which the solver is launched,
 
 ## Tutorial
 
-*A ready-to-run example case will be added in `tutorials/`.*
+### `tutorials/twoDroplets`
+
+Two sessile water droplets on the lower wall of a straight channel exposed to an air flow (B600 upstream, B400 downstream, 1 mm apart), as in the PEMFC configuration of the paper but in a shorter channel:
+
+| | |
+|---|---|
+| Domain | 2 × 1 × 1 mm (x × y × z), uniform cubic cells of 20 μm (100 × 50 × 50 = 250 000 cells) |
+| Droplets | Spherical caps with footprint diameter 0.6 mm (B600, x = 0.5 mm) and 0.4 mm (B400, x = 1.5 mm) |
+| Wall | `forceBalanceContactAngle` on `lowerWall`: θ0 = 50°, θA = 55°, θR = 45° |
+| Air flow | 15 m/s at the inlet, starting after 0.5 ms of relaxation |
+| Run | 2 ms on 6 processors |
+
+All the case parameters (geometry, droplets, angles, inlet velocity, times) are collected in `system/input_par`.
+
+```bash
+cd tutorials/twoDroplets
+./Allrun        # blockMesh, setFields, decomposePar, forceBalanceCAFoam in parallel, reconstructPar
+./Allclean      # back to the initial state
+```
+
+To change the number of processors, edit `numberOfSubdomains` and `n` in `system/decomposeParDict`. The droplet data are written in `CenterOfMass_<i>.txt` and `ForcesOnDroplet_<i>.txt`; the droplet labels are in the field `vofID`.
 
 ## How to cite
 
@@ -186,7 +207,7 @@ If you use forceBalanceCAFoam, please cite the software article (currently under
 
 > C. Antetomaso, S. S. Merola, M. Andersson, H. Garg, *forceBalanceCAFoam: a force-balance-based dynamic contact angle model for multiple droplets in OpenFOAM*, SoftwareX (submitted).
 
-A DOI for the archived release will be added here.
+The citation metadata of the software are in `CITATION.cff` (GitHub: *Cite this repository*). A DOI for the archived release will be added here.
 
 ## License
 

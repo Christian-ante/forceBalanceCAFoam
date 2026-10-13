@@ -1,0 +1,49 @@
+// CHANNEL GEOMETRY [mm] AND DIVISION [#]
+l1		2;	// lenght
+m1		100;	// division of lenght
+
+h1		1;	// height
+m2		#calc "$h1 * $m1 / $l1";	// division of height
+
+t1		1;	// thickness
+m3		$m2;	// division of thickness
+
+
+// DROPLET INITIALIZATION (spherical caps: sphere centred below the lower wall)
+// Droplet 1: B600 (footprint diameter 0.6 mm), droplet 2: B400 (0.4 mm),
+// 1 mm apart; contact angle 50 deg. Droplets 3 and 4 are disabled (radius 0).
+x_d		0.0005;			// x center position [m]
+y_d		-0.0001716;			// y center position [m]
+z_d		0.0005;			// z center position [m]
+r		0.0003456;			// sphere radius [m]
+
+x_d_2		0.0015;			// x center position [m]
+y_d_2		-0.0001144;			// y center position [m]
+z_d_2		0.0005;			// z center position [m]
+r_2		0.0002304;			// sphere radius [m]
+
+x_d_3		0.000;			// x center position [m]
+y_d_3		0.000;			// y center position [m]
+z_d_3		0.000;			// z center position [m]
+r_3		0.000;			// sphere radius [m]
+
+x_d_4		0.000;			// x center position [m]
+y_d_4		0.000;			// y center position [m]
+z_d_4		0.000;			// z center position [m]
+r_4		0.000;			// sphere radius [m]
+
+// CONTACT ANGLE [deg]
+thetaEq		50.0;	// Equilibrium angle
+thetaAdv	55.0;	// Advancing angle
+thetaRec	45.0;	// Receding angle
+kk		1;	// scale factor of adhesion force in 2D
+
+// INLET VELOCITY 
+t		0.0005;	// Delay of the inflow [s]
+V_in		15;	// Inlet velocity [m/s]
+
+// TIME CONTROLS
+start_where	latestTime;	// ("startTime"/"latestTime") WARNING: DO NOT RESET FIELDS WHEN USING "latestTime"!!
+T_start		0;		// start time [s]
+T_end		0.002;		// end time [s]
+T_write		0.0001;		// output delta time [s]

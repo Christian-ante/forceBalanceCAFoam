@@ -1,0 +1,33 @@
+{
+  "title": "forceBalanceCAFoam",
+  "upload_type": "software",
+  "description": "Force-balance-based dynamic contact angle model for multiple droplets in OpenFOAM-7: parallel droplet identification, per-droplet drag and adhesion, and solver coupling with contact angle hysteresis.",
+  "license": "GPL-3.0-only",
+  "keywords": [
+    "OpenFOAM",
+    "wetting",
+    "contact angle hysteresis",
+    "dynamic contact angle",
+    "volume of fluid",
+    "PEMFC"
+  ],
+  "creators": [
+    {
+      "name": "Antetomaso, Christian",
+      "affiliation": "CNR STEMS, Naples, Italy"
+    },
+    {
+      "name": "Merola, S. S.",
+      "affiliation": "CNR STEMS, Naples, Italy"
+    },
+    {
+      "name": "Andersson, M.",
+      "affiliation": "Lund University, Lund, Sweden"
+    },
+    {
+      "name": "Garg, H.",
+      "affiliation": "Lund University, Lund, Sweden"
+    }
+  ],
+  "notes": "Partial financial support: European Union, NextGenerationEU, National Sustainable Mobility Center - MOST, CN00000023, Spoke 12, CUP B43C22000440001."
+}
