@@ -7,6 +7,15 @@ abstract: >-
   and solver coupling with contact angle hysteresis.
 type: software
 version: 1.0.0
+date-released: 2026-10-14
+doi: 10.5281/zenodo.23367988
+identifiers:
+  - type: doi
+    value: 10.5281/zenodo.23367988
+    description: "Version 1.0.0"
+  - type: doi
+    value: 10.5281/zenodo.23367987
+    description: "All versions (concept DOI)"
 license: GPL-3.0-only
 repository-code: "https://github.com/Christian-ante/forceBalanceCAFoam"
 keywords:

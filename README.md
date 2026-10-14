@@ -1,5 +1,7 @@
 # forceBalanceCAFoam
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.23367987.svg)](https://doi.org/10.5281/zenodo.23367987)
+
 **A force-balance-based dynamic contact angle model for multiple droplets in OpenFOAM**
 
 forceBalanceCAFoam extends the OpenFOAM-7 `interFoam` solver and its `dynamicAlphaContactAngle` boundary condition. The dynamic contact angle is driven by a **droplet-level force balance** between aerodynamic drag and adhesion, instead of the empirical velocity scale `u_theta` of the standard boundary condition. Each droplet in the domain is identified, its forces are integrated over its own interface, and the contact angle is set either within the contact angle hysteresis (CAH) window (pinned droplet) or beyond it (sliding droplet).
@@ -207,7 +209,11 @@ If you use forceBalanceCAFoam, please cite the software article (currently under
 
 > C. Antetomaso, S. S. Merola, M. Andersson, H. Garg, *forceBalanceCAFoam: a force-balance-based dynamic contact angle model for multiple droplets in OpenFOAM*, SoftwareX (submitted).
 
-The citation metadata of the software are in `CITATION.cff` (GitHub: *Cite this repository*). A DOI for the archived release will be added here.
+and the archived software:
+
+> C. Antetomaso, S. S. Merola, M. Andersson, H. Garg, *forceBalanceCAFoam* (v1.0.0), Zenodo, 2026. https://doi.org/10.5281/zenodo.23367988
+
+The DOI https://doi.org/10.5281/zenodo.23367987 always resolves to the latest version. The citation metadata are also in `CITATION.cff` (GitHub: *Cite this repository*).
 
 ## License
 
